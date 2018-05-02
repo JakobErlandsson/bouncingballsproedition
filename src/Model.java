@@ -45,7 +45,7 @@ public class Model {
                 b.vy = b.vy > 1 ? b.vy : b.vy * -1;
                 b.vx *= -1;
             }
-            // if no collision, change speed of ball according to gravity. 
+            // if no collision, change speed of ball according to gravity.
             else
                 b.vy -= deltaT * gravity;
 
