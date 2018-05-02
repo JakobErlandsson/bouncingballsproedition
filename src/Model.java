@@ -28,6 +28,7 @@ public class Model {
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
         for (Ball b : balls) {
+            Ball other = collision(b);
             // detect collision with the border
             if (b.x < b.radius || b.x > areaWidth - b.radius) {
                 b.vx *= -1; // change direction of ball
@@ -41,9 +42,23 @@ public class Model {
                 b.vy *= -1;
             }
             // detect collision with other balls
-            else if(collision(b)) {
-                b.vy = b.vy > 1 ? b.vy : b.vy * -1;
-                b.vx *= -1;
+            else if(other != null) {
+                double deltaX = b.x - other.x;
+                double deltaY = b.y - other.y;
+                double u1 = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
+                double u2 = Math.sqrt(other.vx*other.vx + other.vy*other.vy);
+                double m1 = b.radius;
+                double m2 = other.radius;
+                double i = u1*m1 + u2*m2;
+                double r = u1-u2;
+                double v1 = (i-m2*r)/(m1+m2);
+                double v2 = (i+m1*r)/(m1+m2);
+                double theta = Math.tan(deltaX/deltaY);
+
+                b.vx +=  Math.cos((180 - theta)*v1);
+                b.vy +=  Math.sin((180 - theta)*v1);
+                other.vx +=  Math.cos(theta*v2);
+                other.vy +=  Math.sin(theta*v2);
             }
             // if no collision, change speed of ball according to gravity.
             else
@@ -65,15 +80,15 @@ public class Model {
         return Math.sqrt(xDist * xDist + yDist * yDist);
     }
 
-    boolean collision(Ball b) {
+    Ball collision(Ball b) {
         for (Ball other : balls) {
             if (b != other) {
                 if (getDist(b, other) < b.radius + other.radius) {
-                    return true;
+                    return other;
                 }
             }
         }
-        return false;
+        return null;
     }
 
 
