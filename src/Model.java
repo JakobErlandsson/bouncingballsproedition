@@ -21,7 +21,7 @@ public class Model {
 
         // Initialize the model with a few balls
         balls = new Ball[2];
-        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2);
+        balls[0] = new Ball(width / 3, height * 0.9, 1.3, 1.6, 0.2);
         balls[1] = new Ball(2 * width / 3, height * 0.6, -0.6, 0.6, 0.3);
     }
 
@@ -29,20 +29,28 @@ public class Model {
         // TODO this method implements one step of simulation with a step deltaT
         for (Ball b : balls) {
             // detect collision with the border
-            if (b.x < b.radius || b.x > areaWidth - b.radius || collision(b))
+            if (b.x < b.radius || b.x > areaWidth - b.radius) {
                 b.vx *= -1; // change direction of ball
-
-            if (b.y <= b.radius || b.y >= areaHeight - b.radius || collision(b)) {
-                if (b.y < b.radius - 0.1) {
-                    b.y = b.radius;
-                }
-                else
-                    b.vy = b.vy > 1 ? b.vy : b.vy * -1;
             }
+            // detect collision with the floor
+            else if (b.y < b.radius) {
+                b.vy = b.vy > 1 ? b.vy : b.vy * -1;
+            }
+            // detect collision with the roof
+            else if( b.y > areaHeight - b.radius){
+                b.vy *= -1;
+            }
+            // detect collision with other balls
+            else if(collision(b)) {
+                b.vy = b.vy > 1 ? b.vy : b.vy * -1;
+                b.vx *= -1;
+            }
+            // if no collision, change speed of ball according to gravity. 
+            else
+                b.vy -= deltaT * gravity;
 
 
             // compute new position according to the speed of the ball
-            b.vy -= deltaT * gravity;
             b.x += deltaT * b.vx;
             b.y += deltaT * b.vy;
         }
