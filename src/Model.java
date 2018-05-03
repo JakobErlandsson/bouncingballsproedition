@@ -29,26 +29,9 @@ public class Model {
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
         for (Ball b : balls) {
+            // detect collision with another ball
             Ball other = collision(b);
-            // detect collision with the border
-            if (b.x < b.radius) {
-                // only change direction if the ball is moving towards a border
-                // this is to prevent the ball from getting stuck
-                b.v.x = b.v.x < 0 ? b.v.x * -1 : b.v.x;
-            }
-            else if(b.x > areaWidth - b.radius){
-                b.v.x = b.v.x < 0 ? b.v.x : b.v.x * -1;
-            }
-            // detect collision with the floor
-            else if (b.y < b.radius) {
-                b.v.y = b.v.y > 0 ? b.v.y : b.v.y * -1;
-            }
-            // detect collision with the roof
-            else if( b.y > areaHeight - b.radius){
-                b.v.y = b.v.y > 0 ? b.v.y * -1 : b.v.y;
-            }
-            // detect collision with other balls
-            else if(other != null) {
+            if(other != null) {
                 double deltaX = b.x - other.x;
                 double deltaY = b.y - other.y;
                 double theta = Math.tan(deltaX/deltaY);
@@ -59,13 +42,6 @@ public class Model {
                 u2.y -= theta;
                 u1 = polarToRect(u1);
                 u2 = polarToRect(u2);
-
-                /*double[] u1polar = rectToPolar(b.vx,b.vy);
-                double[] u2polar = rectToPolar(other.vx,other.vy);
-                double angle1 = u1polar[1] - theta;
-                double angle2 = u2polar[1] - theta;
-                double[] u1rect = polarToRect(u1polar[0], angle1);
-                double[] u2rect = polarToRect(u2polar[0], angle2);*/
 
                 double m1 = b.radius;
                 double m2 = other.radius;
@@ -84,13 +60,23 @@ public class Model {
                 b.v = polarToRect(u1);
                 other.v = polarToRect(u2);
 
-                /*u1polar = rectToPolar(b.vx,b.vy);
-                u2polar = rectToPolar(other.vx, other.vy);
-                angle1 = u1polar[1] + theta;
-                angle2 = u2polar[1] + theta;
-                b.vx = polarToRect(u1polar[0], angle1)[0];
-                other.vx = polarToRect(u2polar[0], angle2)[0];*/
-
+            }
+            // detect collision with the border
+            else if (b.x < b.radius) {
+                // only change direction if the ball is moving towards a border
+                // this is to prevent the ball from getting stuck
+                b.v.x = b.v.x < 0 ? b.v.x * -1 : b.v.x;
+            }
+            else if(b.x > areaWidth - b.radius){
+                b.v.x = b.v.x < 0 ? b.v.x : b.v.x * -1;
+            }
+            // detect collision with the floor
+            else if (b.y < b.radius) {
+                b.v.y = b.v.y > 0 ? b.v.y : b.v.y * -1;
+            }
+            // detect collision with the roof
+            else if( b.y > areaHeight - b.radius){
+                b.v.y = b.v.y > 0 ? b.v.y * -1 : b.v.y;
             }
             // if no collision, change speed of ball according to gravity.
             else
@@ -115,7 +101,7 @@ public class Model {
     Ball collision(Ball b) {
         for (Ball other : balls) {
             if (b != other) {
-                if (getDist(b, other) < b.radius + other.radius) {
+                if (getDist(b, other) <= b.radius + other.radius) {
                     return other;
                 }
             }
