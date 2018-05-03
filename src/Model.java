@@ -1,3 +1,4 @@
+import java.util.Vector;
 
 /**
  * The physics model.
@@ -22,7 +23,7 @@ public class Model {
         // Initialize the model with a few balls
         balls = new Ball[2];
         balls[0] = new Ball(width / 3, height * 0.9, 1.3, 1.6, 0.2);
-        balls[1] = new Ball(2 * width / 3, height * 0.6, -0.6, 0.6, 0.3);
+        balls[1] = new Ball(2 * width / 3, height * 0.9, -0.6, 0.6, 0.3);
     }
 
     void step(double deltaT) {
@@ -33,18 +34,18 @@ public class Model {
             if (b.x < b.radius) {
                 // only change direction if the ball is moving towards a border
                 // this is to prevent the ball from getting stuck
-                b.vx = b.vx < 0 ? b.vx * -1 : b.vx;
+                b.v.x = b.v.x < 0 ? b.v.x * -1 : b.v.x;
             }
             else if(b.x > areaWidth - b.radius){
-                b.vx = b.vx < 0 ? b.vx : b.vx * -1;
+                b.v.x = b.v.x < 0 ? b.v.x : b.v.x * -1;
             }
             // detect collision with the floor
             else if (b.y < b.radius) {
-                b.vy = b.vy > 0 ? b.vy : b.vy * -1;
+                b.v.y = b.v.y > 0 ? b.v.y : b.v.y * -1;
             }
             // detect collision with the roof
             else if( b.y > areaHeight - b.radius){
-                b.vy = b.vy > 0 ? b.vy * -1 : b.vy;
+                b.v.y = b.v.y > 0 ? b.v.y * -1 : b.v.y;
             }
             // detect collision with other balls
             else if(other != null) {
@@ -52,43 +53,53 @@ public class Model {
                 double deltaY = b.y - other.y;
                 double theta = Math.tan(deltaX/deltaY);
 
+                Vector u1 = rectToPolar(b.v);
+                Vector u2 = rectToPolar(other.v);
+                u1.y -= theta;
+                u2.y -= theta;
+                u1 = polarToRect(u1);
+                u2 = polarToRect(u2);
 
-                double[] u1polar = rectToPolar(b.vx,b.vy);
+                /*double[] u1polar = rectToPolar(b.vx,b.vy);
                 double[] u2polar = rectToPolar(other.vx,other.vy);
                 double angle1 = u1polar[1] - theta;
                 double angle2 = u2polar[1] - theta;
                 double[] u1rect = polarToRect(u1polar[0], angle1);
-                double[] u2rect = polarToRect(u2polar[0], angle2);
+                double[] u2rect = polarToRect(u2polar[0], angle2);*/
 
-
-                double u1 = u1rect[0];
-                double u2 = u2rect[0];
                 double m1 = b.radius;
                 double m2 = other.radius;
-                double i = u1*m1 + u2*m2;
-                double r = u1-u2;
+                double i = u1.x*m1 + u2.x*m2;
+                double r = u1.x-u2.x;
                 double v1 = (i-m2*r)/(m1+m2);
                 double v2 = (i+m1*r)/(m1+m2);
 
-                b.vx = v1;
-                other.vx = v2;
+                b.v.x = v1;
+                other.v.x = v2;
 
-                u1polar = rectToPolar(b.vx,b.vy);
+                u1 = rectToPolar(b.v);
+                u2 = rectToPolar(other.v);
+                u1.y += theta;
+                u2.y += theta;
+                b.v = polarToRect(u1);
+                other.v = polarToRect(u2);
+
+                /*u1polar = rectToPolar(b.vx,b.vy);
                 u2polar = rectToPolar(other.vx, other.vy);
                 angle1 = u1polar[1] + theta;
                 angle2 = u2polar[1] + theta;
                 b.vx = polarToRect(u1polar[0], angle1)[0];
-                other.vx = polarToRect(u2polar[0], angle2)[0];
+                other.vx = polarToRect(u2polar[0], angle2)[0];*/
 
             }
             // if no collision, change speed of ball according to gravity.
             else
-                b.vy -= deltaT * gravity;
+                b.v.y -= deltaT * gravity;
 
 
             // compute new position according to the speed of the ball
-            b.x += deltaT * b.vx;
-            b.y += deltaT * b.vy;
+            b.x += deltaT * b.v.x;
+            b.y += deltaT * b.v.y;
         }
     }
 
@@ -112,16 +123,16 @@ public class Model {
         return null;
     }
 
-    double[] rectToPolar(double x, double y){
-        double r = Math.sqrt(x*x + y*y);
-        double q = Math.atan(y/x);
-        return new double[]{r,q};
+    Vector rectToPolar(Vector v){
+        double r = Math.sqrt(v.x*v.x + v.y*v.y);
+        double q = Math.atan(v.y/v.x);
+        return new Vector(r,q);
 
     }
-    double[] polarToRect(double r, double q){
-        double x = r*Math.cos(q);
-        double y = r*Math.sin(q);
-        return new double[]{x,y};
+    Vector polarToRect(Vector v){
+        double x = v.x*Math.cos(v.y);
+        double y = v.x*Math.sin(v.y);
+        return new Vector(x,y);
     }
 
     /**
@@ -132,14 +143,24 @@ public class Model {
         Ball(double x, double y, double vx, double vy, double r) {
             this.x = x;
             this.y = y;
-            this.vx = vx;
-            this.vy = vy;
+            v = new Vector(vx, vy);
             this.radius = r;
         }
 
         /**
          * Position, speed, and radius of the ball. You may wish to add other attributes.
          */
-        double x, y, vx, vy, radius;
+        double x, y, radius;
+        Vector v;
+    }
+
+    class Vector {
+
+        double x, y;
+
+        Vector(double vx, double vy){
+            this.x = vx;
+            this.y = vy;
+        }
     }
 }
