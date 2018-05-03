@@ -1,4 +1,5 @@
 
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -12,14 +13,14 @@ import javax.swing.Timer;
 
 
 /**
- * Animated JPanel drawing the bouncing balls. No modifications are needed in this class.
- *  
- * @author Simon Robillard
- * 
- */
+* Animated JPanel drawing the bouncing balls. No modifications are needed in this class.
+*  
+* @author Simon Robillard
+* 
+*/
 @SuppressWarnings("serial")
 public final class Animator extends JPanel implements ActionListener {
-
+	
 	public Animator(int pixelWidth, int pixelHeight, int fps) {
 		super(true);
 		this.timer = new Timer(1000 / fps, this);
@@ -30,33 +31,33 @@ public final class Animator extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * Drawing scale
-	 */
+	* Drawing scale
+	*/
 	private static final double pixelsPerMeter = 200;
-
+	
 	/**
-	 * Physical model
-	 */
+	* Physical model
+	*/
 	private Model model;
 	
 	/**
-	 * Timer that triggers redrawing
-	 */
+	* Timer that triggers redrawing
+	*/
 	private Timer timer;
 	
 	/**
-	 * Time interval between redrawing, also used as time step for the model
-	 */
+	* Time interval between redrawing, also used as time step for the model
+	*/
 	private double deltaT;
 	
 	public void start() {
 		timer.start();
 	}
-
+	
 	public void stop() {
-    	timer.stop();
-    }
-
+		timer.stop();
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
@@ -70,31 +71,31 @@ public final class Animator extends JPanel implements ActionListener {
 			double y = b.y + b.radius;
 			// paint balls (y-coordinates are inverted)
 			Ellipse2D.Double e = new Ellipse2D.Double(x * pixelsPerMeter, this.getHeight() - (y * pixelsPerMeter),
-					b.radius * 2 * pixelsPerMeter, b.radius * 2 * pixelsPerMeter);
+			b.radius * 2 * pixelsPerMeter, b.radius * 2 * pixelsPerMeter);
 			g2.fill(e);
 		}
 	}
 	
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    	model.step(deltaT);
-    	this.repaint();
-    }
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		model.step(deltaT);
+		this.repaint();
+	}
 	
 	public static void main(String[] args) {
-        // Schedule a job for the event-dispatching thread:
-        // creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                Animator anim = new Animator(800, 600, 60);
-                JFrame frame = new JFrame("Bouncing balls");
-            	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            	frame.add(anim);
-            	frame.pack();
-            	frame.setLocationRelativeTo(null);
-            	frame.setVisible(true);
-            	anim.start();
-            }
-        });
-    }
+		// Schedule a job for the event-dispatching thread:
+		// creating and showing this application's GUI.
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				Animator anim = new Animator(800, 600, 60);
+				JFrame frame = new JFrame("Bouncing balls");
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.add(anim);
+				frame.pack();
+				frame.setLocationRelativeTo(null);
+				frame.setVisible(true);
+				anim.start();
+			}
+		});
+	}
 }
