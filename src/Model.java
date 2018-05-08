@@ -26,12 +26,6 @@ public class Model {
         balls[1] = new Ball(2 * width / 3, height * 0.9, -0.6, 0.6, 0.15);
     }
 
-    Vector rotate(Vector vector, Double ang) {
-        double x = vector.x * Math.cos(ang) - vector.y * Math.sin(ang);
-        double y = vector.x * Math.sin(ang) + vector.y * Math.cos(ang);
-        return new Vector(x, y);
-    }
-
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
         for (Ball b : balls) {
@@ -128,6 +122,12 @@ public class Model {
             }
         }
         return null;
+    }
+
+    Vector rotate(Vector vector, Double ang) {
+        double x = vector.x * Math.cos(ang) - vector.y * Math.sin(ang);
+        double y = vector.x * Math.sin(ang) + vector.y * Math.cos(ang);
+        return new Vector(x, y);
     }
 
     Vector rectToPolar(Vector v) {
