@@ -23,7 +23,8 @@ public class Model {
         // Initialize the model with a few balls
         balls = new Ball[2];
         balls[0] = new Ball(width / 3, height * 0.9, 1.3, 1.6, 0.2);
-        balls[1] = new Ball(2 * width / 3, height * 0.9, -0.6, 0.6, 0.15);
+        balls[1] = new Ball(2 * width / 3, height * 0.9, -0.6, 0.6, 0.2);
+        //balls[2] = new Ball(width / 5, height * 0.7, -0.6, 0.6, 0.3);
     }
 
     void step(double deltaT) {
@@ -32,10 +33,13 @@ public class Model {
             // detect collision with another ball
             Ball other = null;
             //System.out.println(time);
-            if (time < 5){
+            if (time < 5) {
                 other = collision(b);
-            } else{ time --; }
+            } else {
+                time--;
+            }
             if (other != null) {
+
                 double deltaX = b.x - other.x;
                 double deltaY = b.y - other.y;
                 double theta = Math.atan(deltaY / deltaX);
@@ -48,14 +52,16 @@ public class Model {
                 // u1 = polarToRect(u1);
                 // u2 = polarToRect(u2);
 
-                Vector u1 = rotate(b.v, theta), u2 = rotate(other.v, theta);
+                Vector u1 = rotate(b.v, -theta), u2 = rotate(other.v, -theta);
 
-                double m1 = b.radius;
-                double m2 = other.radius;
+                double m1 = b.radius * b.radius;
+                double m2 = other.radius * other.radius;
                 double i = u1.x * m1 + u2.x * m2;
-                double r = u1.x - u2.x;
+                double r = -(u2.x-u1.x);
                 double v1 = (i - m2 * r) / (m1 + m2);
                 double v2 = (i + m1 * r) / (m1 + m2);
+
+
 
                 Vector vB = new Vector(v1, u1.y);
                 Vector vOther = new Vector(v2, u2.y);
@@ -69,30 +75,33 @@ public class Model {
                 // b.v = polarToRect(u1);
                 // other.v = polarToRect(u2);
 
-                b.v = rotate(vB, -theta);
-                other.v = rotate(vOther, -theta);
+                b.v = rotate(vB, theta);
+                other.v = rotate(vOther, theta);
+
+                System.out.println("moment = " + (b.getVelocity()*m1 + other.getVelocity()*m2));
+                System.out.println("energi = " + (b.getVelocity()*b.getVelocity()*m1/2 + other.getVelocity()*other.getVelocity()*m2/2));
 
             }
             // detect collision with the border
-            else if (b.x < b.radius) {
+            else if (b.x < b.radius)
                 // only change direction if the ball is moving towards a border
                 // this is to prevent the ball from getting stuck
                 b.v.x = b.v.x < 0 ? b.v.x * -1 : b.v.x;
-            } else if (b.x > areaWidth - b.radius) {
+
+            else if (b.x > areaWidth - b.radius)
                 b.v.x = b.v.x < 0 ? b.v.x : b.v.x * -1;
-            }
-            // detect collision with the floor
-            else if (b.y < b.radius) {
+
+                // detect collision with the floor
+            else if (b.y < b.radius)
                 b.v.y = b.v.y > 0 ? b.v.y : b.v.y * -1;
-            }
-            // detect collision with the roof
-            else if (b.y > areaHeight - b.radius) {
+
+                // detect collision with the roof
+            else if (b.y > areaHeight - b.radius)
                 b.v.y = b.v.y > 0 ? b.v.y * -1 : b.v.y;
-            }
-            // if no collision, change speed of ball according to gravity.
+
+                // if no collision, change speed of ball according to gravity.
             else
                 b.v.y -= deltaT * gravity;
-
 
             // compute new position according to the speed of the ball
             b.x += deltaT * b.v.x;
@@ -112,12 +121,10 @@ public class Model {
     Ball collision(Ball b) {
         for (Ball other : balls) {
             if (b != other) {
-                if (getDist(b, other) <= (b.radius + other.radius)*1.05) {
-
+                if (getDist(b, other) <= (b.radius + other.radius)) {
                     //System.out.println("coll" + String.valueOf(Math.random()));
-                    time = 25;
+                    time = 10;
                     return other;
-
                 }
             }
         }
@@ -134,7 +141,6 @@ public class Model {
         double r = Math.sqrt(v.x * v.x + v.y * v.y);
         double q = Math.atan(v.y / v.x);
         return new Vector(r, q);
-
     }
 
     Vector polarToRect(Vector v) {
@@ -153,6 +159,10 @@ public class Model {
             this.y = y;
             v = new Vector(vx, vy);
             this.radius = r;
+        }
+
+        double getVelocity(){
+            return Math.sqrt(v.x*v.x+v.y*v.y);
         }
 
         /**
