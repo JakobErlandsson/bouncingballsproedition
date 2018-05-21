@@ -33,17 +33,15 @@ public class Model {
         for (Ball b : balls) {
             // detect collision with another ball
             Ball other = null;
-            //System.out.println(time);
-            if (time < 0) {
+            if (time < 0)
                 other = collision(b);
-            } else {
+            else
                 time--;
-            }
             if (other != null) {
 
                 float deltaX = (b.x - other.x);
                 float deltaY = (b.y - other.y);
-                float theta = (float)Math.atan(deltaY / deltaX);
+                float theta = (float) Math.atan(deltaY / deltaX);
 
 
                 float m1 = b.mass;
@@ -51,36 +49,34 @@ public class Model {
 
                 Vector u1 = rotate(b.v, -theta), u2 = rotate(other.v, -theta);
 
-                float mom1 = b.v.x*m1 + other.v.x*m2;
-                float kin1 = b.v.x*b.v.x*m1/2 + other.v.x*other.v.x*m2/2;
+                float mom1 = b.v.x * m1 + other.v.x * m2;
+                float kin1 = b.v.x * b.v.x * m1 / 2 + other.v.x * other.v.x * m2 / 2;
 
 
-
-                float r = u1.x-u2.x;
-
+                float r = u1.x - u2.x;
                 float i = u1.x * m1 + u2.x * m2;
                 float v1 = (i - m2 * r) / (m1 + m2);
                 float v2 = (i + m1 * r) / (m1 + m2);
+
                 u1 = new Vector(v1, u1.y);
                 u2 = new Vector(v2, u2.y);
 
 
-
-                System.out.println("Difference in momentum: \t" + ((u1.x*m1 + u1.x*m2)-mom1));
-                System.out.println("Difference in energy: \t\t" + ((u1.x*u1.x*m1/2 + u1.x*u1.x*m2/2)-kin1) + "\n");
-
+                System.out.println("Difference in momentum: \t" + ((u1.x * m1 + u1.x * m2) - mom1));
+                System.out.println("Difference in energy: \t\t" + ((u1.x * u1.x * m1 / 2 + u1.x * u1.x * m2 / 2) - kin1) + "\n");
 
 
                 b.v = rotate(u1, theta);
                 other.v = rotate(u2, theta);
 
             }
-            // detect collision with the border
+            // detect collision with the left border
             else if (b.x < b.radius)
                 // only change direction if the ball is moving towards a border
                 // this is to prevent the ball from getting stuck
                 b.v.x = b.v.x < 0 ? b.v.x * -1 : b.v.x;
 
+                // detect collision with the right border
             else if (b.x > areaWidth - b.radius)
                 b.v.x = b.v.x < 0 ? b.v.x : b.v.x * -1;
 
@@ -108,14 +104,14 @@ public class Model {
     float getDist(Ball b1, Ball b2) {
         float xDist = Math.abs((b1.x - b2.x));
         float yDist = Math.abs((b1.y - b2.y));
-        return (float)Math.sqrt((xDist * xDist) + (yDist * yDist));
+        return (float) Math.sqrt((xDist * xDist) + (yDist * yDist));
     }
 
     Ball collision(Ball b) {
         for (Ball other : balls) {
             if (b != other) {
                 if (getDist(b, other) <= (b.radius + other.radius)) {
-                    time =2;
+                    time = 2;
                     return other;
                 }
             }
@@ -124,8 +120,8 @@ public class Model {
     }
 
     Vector rotate(Vector vector, double ang) {
-        float x = (float)(vector.x * Math.cos(ang) - vector.y * Math.sin(ang));
-        float y = (float)(vector.x * Math.sin(ang) + vector.y * Math.cos(ang));
+        float x = (float) (vector.x * Math.cos(ang) - vector.y * Math.sin(ang));
+        float y = (float) (vector.x * Math.sin(ang) + vector.y * Math.cos(ang));
         return new Vector(x, y);
     }
 
@@ -139,7 +135,7 @@ public class Model {
             this.y = y;
             v = new Vector(vx, vy);
             this.radius = r;
-            mass = r*r*r;
+            mass = r * r * r;
         }
 
         /**
