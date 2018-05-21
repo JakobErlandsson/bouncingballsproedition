@@ -25,7 +25,7 @@ public final class Animator extends JPanel implements ActionListener {
 		super(true);
 		this.timer = new Timer(1000 / fps, this);
 		this.deltaT = 1.0 / fps;
-		this.model = new Model(pixelWidth / pixelsPerMeter, pixelHeight / pixelsPerMeter);
+		this.model = new Model((float)(pixelWidth / pixelsPerMeter), (float)(pixelHeight / pixelsPerMeter));
 		this.setOpaque(false);
 		this.setPreferredSize(new Dimension(pixelWidth, pixelHeight));
 	}
@@ -87,7 +87,7 @@ public final class Animator extends JPanel implements ActionListener {
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				Animator anim = new Animator(800, 600, 60);
+				Animator anim = new Animator(800, 600, 100);
 				JFrame frame = new JFrame("Bouncing balls");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.add(anim);

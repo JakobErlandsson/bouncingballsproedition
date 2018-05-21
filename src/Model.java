@@ -10,76 +10,69 @@
  */
 public class Model {
 
-    double areaWidth, areaHeight;
-    double gravity = 9.82;
+    float areaWidth, areaHeight;
+    float gravity = 9.82f;
     int time = 0;
 
     Ball[] balls;
 
-    Model(double width, double height) {
+    Model(float width, float height) {
         areaWidth = width;
         areaHeight = height;
 
         // Initialize the model with a few balls
         balls = new Ball[2];
-        balls[0] = new Ball(width / 3, height * 0.9, 1.3, 1.6, 0.2);
-        balls[1] = new Ball(2 * width / 3, height * 0.9, -0.6, 0.6, 0.2);
-        //balls[2] = new Ball(width / 5, height * 0.7, -0.6, 0.6, 0.3);
+        balls[0] = new Ball(width * 0.25f, height * 0.75f, 2f, 0, 0.2f);
+        balls[1] = new Ball(width * 0.5f, height * 0.70f, -2f, 0, 0.25f);
+
     }
 
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
+
         for (Ball b : balls) {
             // detect collision with another ball
             Ball other = null;
             //System.out.println(time);
-            if (time < 5) {
+            if (time < 0) {
                 other = collision(b);
             } else {
                 time--;
             }
             if (other != null) {
 
-                double deltaX = b.x - other.x;
-                double deltaY = b.y - other.y;
-                double theta = Math.atan(deltaY / deltaX);
+                float deltaX = (b.x - other.x);
+                float deltaY = (b.y - other.y);
+                float theta = (float)Math.atan(deltaY / deltaX);
 
 
-                // Vector u1 = rectToPolar(b.v);
-                // Vector u2 = rectToPolar(other.v);
-                // u1.y -= theta;
-                // u2.y -= theta;
-                // u1 = polarToRect(u1);
-                // u2 = polarToRect(u2);
+                float m1 = b.mass;
+                float m2 = other.mass;
 
                 Vector u1 = rotate(b.v, -theta), u2 = rotate(other.v, -theta);
 
-                double m1 = b.radius * b.radius;
-                double m2 = other.radius * other.radius;
-                double i = u1.x * m1 + u2.x * m2;
-                double r = -(u2.x-u1.x);
-                double v1 = (i - m2 * r) / (m1 + m2);
-                double v2 = (i + m1 * r) / (m1 + m2);
+                float mom1 = b.v.x*m1 + other.v.x*m2;
+                float kin1 = b.v.x*b.v.x*m1/2 + other.v.x*other.v.x*m2/2;
 
 
 
-                Vector vB = new Vector(v1, u1.y);
-                Vector vOther = new Vector(v2, u2.y);
-                // b.v.x = v1;
-                // other.v.x = v2;
+                float r = u1.x-u2.x;
 
-                // u1 = rectToPolar(b.v);
-                // u2 = rectToPolar(other.v);
-                // u1.y += theta;
-                // u2.y += theta;
-                // b.v = polarToRect(u1);
-                // other.v = polarToRect(u2);
+                float i = u1.x * m1 + u2.x * m2;
+                float v1 = (i - m2 * r) / (m1 + m2);
+                float v2 = (i + m1 * r) / (m1 + m2);
+                u1 = new Vector(v1, u1.y);
+                u2 = new Vector(v2, u2.y);
 
-                b.v = rotate(vB, theta);
-                other.v = rotate(vOther, theta);
 
-                System.out.println("moment = " + (b.getVelocity()*m1 + other.getVelocity()*m2));
-                System.out.println("energi = " + (b.getVelocity()*b.getVelocity()*m1/2 + other.getVelocity()*other.getVelocity()*m2/2));
+
+                System.out.println("Difference in momentum: \t" + ((u1.x*m1 + u1.x*m2)-mom1));
+                System.out.println("Difference in energy: \t\t" + ((u1.x*u1.x*m1/2 + u1.x*u1.x*m2/2)-kin1) + "\n");
+
+
+
+                b.v = rotate(u1, theta);
+                other.v = rotate(u2, theta);
 
             }
             // detect collision with the border
@@ -112,18 +105,17 @@ public class Model {
 
     // calculating the distance between the center of two balls with the
     // Pythagorean theorem
-    double getDist(Ball b1, Ball b2) {
-        double xDist = Math.abs((b1.x - b2.x));
-        double yDist = Math.abs((b1.y - b2.y));
-        return Math.sqrt(xDist * xDist + yDist * yDist);
+    float getDist(Ball b1, Ball b2) {
+        float xDist = Math.abs((b1.x - b2.x));
+        float yDist = Math.abs((b1.y - b2.y));
+        return (float)Math.sqrt((xDist * xDist) + (yDist * yDist));
     }
 
     Ball collision(Ball b) {
         for (Ball other : balls) {
             if (b != other) {
                 if (getDist(b, other) <= (b.radius + other.radius)) {
-                    //System.out.println("coll" + String.valueOf(Math.random()));
-                    time = 10;
+                    time =2;
                     return other;
                 }
             }
@@ -131,21 +123,9 @@ public class Model {
         return null;
     }
 
-    Vector rotate(Vector vector, Double ang) {
-        double x = vector.x * Math.cos(ang) - vector.y * Math.sin(ang);
-        double y = vector.x * Math.sin(ang) + vector.y * Math.cos(ang);
-        return new Vector(x, y);
-    }
-
-    Vector rectToPolar(Vector v) {
-        double r = Math.sqrt(v.x * v.x + v.y * v.y);
-        double q = Math.atan(v.y / v.x);
-        return new Vector(r, q);
-    }
-
-    Vector polarToRect(Vector v) {
-        double x = v.x * Math.cos(v.y);
-        double y = v.x * Math.sin(v.y);
+    Vector rotate(Vector vector, double ang) {
+        float x = (float)(vector.x * Math.cos(ang) - vector.y * Math.sin(ang));
+        float y = (float)(vector.x * Math.sin(ang) + vector.y * Math.cos(ang));
         return new Vector(x, y);
     }
 
@@ -154,29 +134,27 @@ public class Model {
      */
     class Ball {
 
-        Ball(double x, double y, double vx, double vy, double r) {
+        Ball(float x, float y, float vx, float vy, float r) {
             this.x = x;
             this.y = y;
             v = new Vector(vx, vy);
             this.radius = r;
-        }
-
-        double getVelocity(){
-            return Math.sqrt(v.x*v.x+v.y*v.y);
+            mass = r*r*r;
         }
 
         /**
          * Position, speed, and radius of the ball. You may wish to add other attributes.
          */
-        double x, y, radius;
+        float x, y, radius;
         Vector v;
+        float mass;
     }
 
     class Vector {
 
-        double x, y;
+        float x, y;
 
-        Vector(double vx, double vy) {
+        Vector(float vx, float vy) {
             this.x = vx;
             this.y = vy;
         }
